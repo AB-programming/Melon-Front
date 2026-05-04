@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    height: 100%;
+}
+
+/* app/globals.css */
+.rounded-video-wrapper {
+    border-radius: 1rem;
+    overflow: hidden;
+    background: #000;
+}
+
+.rounded-video-wrapper video,
+.rounded-video-wrapper iframe,
+.rounded-video-wrapper > * > video,
+.rounded-video-wrapper > * > iframe {
+    border-radius: 0.5rem !important;
+    width: 100% !important;
+    height: auto !important;
+}
