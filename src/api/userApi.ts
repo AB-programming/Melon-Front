@@ -1,5 +1,6 @@
 import request, { Method, Options } from '@/api/client';
 import { HttpResponse, User } from '@/utils/types';
+import { SubscribedUser } from '@/components/SubscribedUsers';
 
 const token = localStorage.getItem('access_token') ?? '';
 
@@ -103,6 +104,20 @@ async function getFansRequest(userId: string) {
   return await request<number>('/user/subscription/getFans', Method.GET, options);
 }
 
+async function getSubscriptionsRequest(subscriber: string) {
+  const options: Options = {
+    token,
+    body: {
+      subscriber,
+    },
+  };
+  return await request<Array<SubscribedUser>>(
+    '/user/subscription/getMySubscriptions',
+    Method.GET,
+    options,
+  );
+}
+
 export {
   getUserRequest,
   uploadAvatarRequest,
@@ -111,5 +126,6 @@ export {
   addSubscriptionRequest,
   isSubscribedRequest,
   cancelSubscriptionRequest,
-  getFansRequest
+  getFansRequest,
+  getSubscriptionsRequest
 };
