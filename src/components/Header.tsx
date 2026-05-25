@@ -22,6 +22,7 @@ import {
   PopoverTrigger,
   useDisclosure,
   User as UserIcon,
+  Progress,
 } from '@heroui/react';
 import { MelonLogo } from './MelonLogo';
 import { LogOut, NotepadText, UserRound, Wallet, Send } from 'lucide-react';
@@ -34,7 +35,13 @@ import type { Introspect } from '@/utils/types';
 import { HttpCode } from '@/utils/types';
 import { useStore } from '@/utils/store';
 import { getUserRequest } from '@/api/userApi';
-import { createVideoRequest } from '@/api/videoApi';
+import {
+  createVideoRequest,
+  mergeRequest,
+  uploadChunkRequest,
+} from '@/api/videoApi';
+import SparkMD5 from 'spark-md5';
+import pLimit from 'p-limit';
 
 export function Header() {
   const router = useRouter();
@@ -43,6 +50,9 @@ export function Header() {
     localStorage.getItem('login_status') != undefined &&
       localStorage.getItem('login_status') === 'true',
   );
+
+  const limit = pLimit(5); // Limit the number of concurrent uploads to 5
+  const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB, this is file chunk size for vide upload
 
   const user = useStore((state) => state.user);
   const avatarVersion = useStore((state) => state.avatarVersion);
@@ -54,6 +64,7 @@ export function Header() {
   const [pictureName, setPictureName] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -116,6 +127,44 @@ export function Header() {
     }
   }
 
+  function createChunks(file: File) {
+    const chunks = [];
+    let current = 0;
+    while (current < file.size) {
+      chunks.push(file.slice(current, current + CHUNK_SIZE));
+      current += CHUNK_SIZE;
+    }
+    return chunks;
+  }
+
+  async function calculateFileMD5(file: File) {
+    return new Promise<string>((resolve) => {
+      const chunks = Math.ceil(file.size / CHUNK_SIZE);
+      let currentChunk = 0;
+      const spark = new SparkMD5.ArrayBuffer();
+
+      const fileReader = new FileReader();
+
+      fileReader.onload = (e) => {
+        spark.append(e.target?.result as ArrayBuffer);
+        currentChunk++;
+        if (currentChunk < chunks) {
+          loadNext();
+        } else {
+          resolve(spark.end());
+        }
+      };
+
+      function loadNext() {
+        const start = currentChunk * CHUNK_SIZE;
+        const end = Math.min(start + CHUNK_SIZE, file.size);
+        fileReader.readAsArrayBuffer(file.slice(start, end));
+      }
+
+      loadNext();
+    });
+  }
+
   async function submitVideo(close: () => void) {
     if (!video) {
       addToast({
@@ -135,25 +184,68 @@ export function Header() {
       });
       return;
     }
+
     const result = await createVideoRequest(
-      video,
       picture,
       user.id,
       title,
       description,
     );
     if (result.code === HttpCode.OK) {
-      addToast({
-        title: 'Upload Successfully',
-        description: 'The video has been upload successfully',
-        color: 'success',
-        variant: 'flat',
+      const chunks = createChunks(video);
+      const fileMd5 = await calculateFileMD5(video);
+
+      let uploadBytes = 0;
+
+      const tasks = chunks.map((chunk, index) => {
+        return limit(async () => {
+          const response = await uploadChunkRequest(chunk, index, fileMd5);
+          return new Promise<boolean>((resolve, reject) => {
+            if (response.code === HttpCode.OK && response.data) {
+              resolve(true);
+              uploadBytes += chunk.size;
+              setUploadProgress(Math.floor((uploadBytes / video.size) * 100));
+              return;
+            }
+            reject(false);
+          });
+        });
       });
-      close();
-      setVideo(null);
-      setVideoName('');
-      setTitle('');
-      setDescription('');
+
+      try {
+        await Promise.all(tasks);
+        // all chunks uploaded successfully, now request merge
+        const mergeResponse = await mergeRequest(fileMd5, result.data);
+        if (mergeResponse.code === HttpCode.OK && mergeResponse.data) {
+          addToast({
+            title: 'Upload Successfully',
+            description: 'The video has been upload successfully',
+            color: 'success',
+            variant: 'flat',
+          });
+          close();
+          setVideo(null);
+          setVideoName('');
+          setTitle('');
+          setDescription('');
+        } else {
+          // merge failed
+          addToast({
+            title: 'Upload Failed',
+            description: 'Please again wait',
+            color: 'danger',
+            variant: 'flat',
+          });
+        }
+      } catch (error) {
+        console.error('💥 Promise.all failed，reason:', error);
+        addToast({
+          title: 'Upload Failed',
+          description: 'Please again wait',
+          color: 'danger',
+          variant: 'flat',
+        });
+      }
     }
   }
 
@@ -168,11 +260,7 @@ export function Header() {
         <NavbarContent justify="end">
           {loginStatus && (
             <NavbarItem>
-              <Button
-                onPress={onOpen}
-                color="success"
-                variant="faded"
-              >
+              <Button onPress={onOpen} color="success" variant="faded">
                 <Send size={18} />
                 Upload video
               </Button>
@@ -286,6 +374,14 @@ export function Header() {
                       />
                     </div>
                     {videoName && <div>Selected video: {videoName}</div>}
+                    <Progress
+                      aria-label="Uploading..."
+                      className="max-w-md"
+                      color="success"
+                      showValueLabel={true}
+                      size="md"
+                      value={uploadProgress}
+                    />
                     <div className="flex items-center gap-4">
                       <label>Cover:</label>
                       <Input
