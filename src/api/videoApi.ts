@@ -181,7 +181,7 @@ async function sendReplyRequest(
   return request<Reply>('/video/reply', Method.POST, options);
 }
 
-async function checkChunk(fileMd5: string) {
+async function checkChunkRequest(fileMd5: string) {
   const options: Options = {
     token,
     body: {
@@ -214,6 +214,13 @@ async function mergeRequest(fileMd5: string, id: string) {
   return request<boolean>('/video/merge', Method.POST, options);
 }
 
+async function checkMergeRequest(fileId: string) {
+  const options: Options = {
+    token
+  }
+  return request<string>(`/video/checkMerge/${fileId}`, Method.GET, options);
+}
+
 export {
   createVideoRequest,
   isLikeRequest,
@@ -230,7 +237,8 @@ export {
   deleteCommentRequest,
   fetchUserVideoListRequest,
   sendReplyRequest,
-  checkChunk,
+  checkChunkRequest,
   uploadChunkRequest,
-  mergeRequest
+  mergeRequest,
+  checkMergeRequest
 };

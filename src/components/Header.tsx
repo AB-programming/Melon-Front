@@ -36,6 +36,7 @@ import { HttpCode } from '@/utils/types';
 import { useStore } from '@/utils/store';
 import { getUserRequest } from '@/api/userApi';
 import {
+  checkMergeRequest,
   createVideoRequest,
   mergeRequest,
   uploadChunkRequest,
@@ -165,6 +166,33 @@ export function Header() {
     });
   }
 
+  async function pollCheckMerge(fileId: string) {
+    while (true) {
+      const response = await checkMergeRequest(fileId);
+      if (response.code === HttpCode.OK) {
+        const status = response.data;
+        if (status === 'SUCCESS') {
+          addToast({
+            title: 'Handle Successfully',
+            description: 'File processing successful.',
+            color: 'success',
+            variant: 'flat',
+          });
+          break;
+        } else if (status === 'MERGING') {
+          continue;
+        }
+      }
+      addToast({
+        title: 'Error',
+        description: 'File processing failed, please upload again later!',
+        color: 'danger',
+        variant: 'flat',
+      });
+      break;
+    }
+  }
+
   async function submitVideo(close: () => void) {
     if (!video) {
       addToast({
@@ -219,7 +247,8 @@ export function Header() {
         if (mergeResponse.code === HttpCode.OK && mergeResponse.data) {
           addToast({
             title: 'Upload Successfully',
-            description: 'The video has been upload successfully',
+            description:
+              'The file has been uploaded and is being processed in the background. Please wait.',
             color: 'success',
             variant: 'flat',
           });
@@ -228,6 +257,8 @@ export function Header() {
           setVideoName('');
           setTitle('');
           setDescription('');
+          // Polling to check if the video is merged successfully and published
+          await pollCheckMerge(result.data);
         } else {
           // merge failed
           addToast({
