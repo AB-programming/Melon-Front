@@ -30,7 +30,7 @@ import { UserHome } from '@/components/UserHome';
 import { SubscribedUsers } from '@/components/SubscribedUsers';
 
 export default function Self() {
-  const localUser = JSON.parse(localStorage.getItem('user') ?? '') as User;
+  const localUser = JSON.parse(localStorage.getItem('user') ?? '{}') as User;
 
   const user = useStore((state) => state.user);
   const updateUser = useStore((state) => state.updateUser);
