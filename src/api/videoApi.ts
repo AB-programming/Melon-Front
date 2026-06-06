@@ -4,14 +4,12 @@ import { Comment, Reply, Video } from '@/utils/types';
 const token = localStorage.getItem('access_token') ?? '';
 
 async function createVideoRequest(
-  video: File,
   picture: File,
   userId: string,
   title: string,
   description: string,
 ) {
   const formData = new FormData();
-  formData.append('video', video);
   formData.append('picture', picture);
   formData.append('userId', userId);
   formData.append('title', title);
@@ -183,6 +181,46 @@ async function sendReplyRequest(
   return request<Reply>('/video/reply', Method.POST, options);
 }
 
+async function checkChunkRequest(fileMd5: string) {
+  const options: Options = {
+    token,
+    body: {
+      fileMd5
+    }
+  };
+  return request<number[]>('/video/check', Method.POST, options);
+}
+
+async function uploadChunkRequest(chunk: Blob, index: number, fileMd5: string) {
+  const formData = new FormData();
+  formData.append('chunk', chunk);
+  formData.append('index', String(index));
+  formData.append('fileMd5', fileMd5);
+  const options: Options = {
+    token,
+    body: formData,
+  };
+  return await request<boolean>('/video/uploadChunk', Method.POST, options);
+}
+
+async function mergeRequest(fileMd5: string, id: string) {
+  const options: Options = {
+    token,
+    body: {
+      fileMd5,
+      id
+    }
+  };
+  return request<boolean>('/video/merge', Method.POST, options);
+}
+
+async function checkMergeRequest(fileId: string) {
+  const options: Options = {
+    token
+  }
+  return request<string>(`/video/checkMerge/${fileId}`, Method.GET, options);
+}
+
 export {
   createVideoRequest,
   isLikeRequest,
@@ -199,4 +237,8 @@ export {
   deleteCommentRequest,
   fetchUserVideoListRequest,
   sendReplyRequest,
+  checkChunkRequest,
+  uploadChunkRequest,
+  mergeRequest,
+  checkMergeRequest
 };
