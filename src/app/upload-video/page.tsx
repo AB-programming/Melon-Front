@@ -2,12 +2,16 @@
 
 import {
   addToast,
-  Button, Card, CardBody, CardFooter, CardHeader,
+  Button,
+  Card,
+  CardBody,
+  CardFooter,
+  CardHeader,
   Form,
   Input,
-  Progress,
+  Progress, Textarea,
 } from '@heroui/react';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   checkMergeRequest,
   createVideoRequest,
@@ -17,26 +21,42 @@ import {
 import { HttpCode, User } from '@/utils/types';
 import SparkMD5 from 'spark-md5';
 import pLimit from 'p-limit';
+import { useRouter } from 'next/navigation';
 
 export default function UploadVideo() {
   const limit = pLimit(5); // Limit the number of concurrent uploads to 5
   const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB, this is file chunk size for vide upload
 
+  const router = useRouter();
   const user = JSON.parse(localStorage.getItem('user') ?? '{}') as User;
 
+  const cancelledRef = useRef(false);
   const [video, setVideo] = useState<File | null>(null);
   const [picture, setPicture] = useState<File | null>(null);
   const [videoName, setVideoName] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
   const [pictureName, setPictureName] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [picturePreview, setPicturePreview] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      cancelledRef.current = true;
+    }
+  }, []);
 
   async function handleUploadVideo(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (file) {
       setVideoName(file.name);
       setVideo(file);
+      setVideoUrl(URL.createObjectURL(file));
+      const cover = await captureVideoCover(file);
+      setPicture(cover);
+      setPicturePreview(URL.createObjectURL(cover));
       event.target.value = '';
     }
   }
@@ -48,8 +68,42 @@ export default function UploadVideo() {
     if (file) {
       setPictureName(file.name);
       setPicture(file);
+      setPicturePreview(URL.createObjectURL(file));
       event.target.value = '';
     }
+  }
+
+  function captureVideoCover(file: File): Promise<File> {
+    return new Promise((resolve, reject) => {
+      const video = document.createElement('video');
+      video.src = URL.createObjectURL(file);
+      video.muted = true;
+      video.onloadeddata = () => {
+        // 跳到1秒位置
+        video.currentTime = 1;
+      };
+      video.onseeked = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject();
+          return;
+        }
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            reject();
+            return;
+          }
+          const coverFile = new File([blob], 'cover.jpg', {
+            type: 'image/jpeg',
+          });
+          resolve(coverFile);
+        }, 'image/jpeg');
+      };
+    });
   }
 
   function createChunks(file: File) {
@@ -91,7 +145,8 @@ export default function UploadVideo() {
   }
 
   async function pollCheckMerge(fileId: string) {
-    while (true) {
+    // The polling frequency is set to 60 times.
+    for (let i = 0; i < 60; i++) {
       const response = await checkMergeRequest(fileId);
       if (response.code === HttpCode.OK) {
         const status = response.data;
@@ -102,11 +157,15 @@ export default function UploadVideo() {
             color: 'success',
             variant: 'flat',
           });
+          router.push('/');
           break;
         } else if (status === 'MERGING') {
+          await new Promise((r) => setTimeout(r, 2000))
           continue;
         }
       }
+      // To avoid continuously polling when the user manually exits the interface
+      if (cancelledRef.current) return;
       addToast({
         title: 'Error',
         description: 'File processing failed, please upload again later!',
@@ -115,9 +174,11 @@ export default function UploadVideo() {
       });
       break;
     }
+    setIsLoading(false);
   }
 
   async function submitVideo() {
+    setIsLoading(true);
     if (!video) {
       addToast({
         title: 'Warning',
@@ -206,6 +267,17 @@ export default function UploadVideo() {
   return (
     <Card className="w-full md:w-1/2 lg:w-2/5 max-w-xl mt-6 mx-auto">
       <CardHeader className="flex flex-col gap-1">Create my video</CardHeader>
+      {videoUrl && (
+        <video
+          src={videoUrl}
+          controls
+          width="100%"
+          style={{
+            maxHeight: '300px',
+            borderRadius: '8px',
+          }}
+        />
+      )}
       <CardBody>
         <Form className="flex flex-col gap-4">
           <div className="flex flex-col gap-2 justify-center w-full">
@@ -226,6 +298,16 @@ export default function UploadVideo() {
               size="md"
               value={uploadProgress}
             />
+            {picturePreview && (
+              <img
+                src={picturePreview}
+                alt="cover"
+                style={{
+                  width: '300px',
+                  borderRadius: '8px',
+                }}
+              />
+            )}
             <div className="flex items-center gap-4">
               <label>Cover:</label>
               <Input
@@ -247,21 +329,20 @@ export default function UploadVideo() {
             value={title}
             onValueChange={setTitle}
           />
-          <Input
-            errorMessage="Please enter a valid description"
-            label="Description"
+          <Textarea
             labelPlacement="outside"
-            name="description"
-            placeholder="Enter your video description"
-            type="text"
+            isClearable
             value={description}
+            label="Description"
+            placeholder="Enter your video description"
+            variant="bordered"
             onValueChange={setDescription}
           />
         </Form>
       </CardBody>
       <CardFooter className="flex justify-center gap-4">
-        <Button variant="ghost">Cancel</Button>
-        <Button color="primary" onPress={submitVideo}>
+        <Button variant="ghost" onPress={() => router.push('/')}>Cancel</Button>
+        <Button isLoading={isLoading} color="primary" onPress={submitVideo}>
           Create
         </Button>
       </CardFooter>
