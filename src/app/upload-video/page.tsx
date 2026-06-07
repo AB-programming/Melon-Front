@@ -7,10 +7,13 @@ import {
   CardBody,
   CardFooter,
   CardHeader,
+  Chip,
   Form,
   Input,
-  Progress, Textarea,
+  Progress,
+  Textarea,
 } from '@heroui/react';
+import { Film, Image as ImageIcon, Upload } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   checkMergeRequest,
@@ -267,29 +270,93 @@ export default function UploadVideo() {
   return (
     <Card className="w-full md:w-1/2 lg:w-2/5 max-w-xl mt-6 mx-auto">
       <CardHeader className="flex flex-col gap-1">Create my video</CardHeader>
-      {videoUrl && (
-        <video
-          src={videoUrl}
-          controls
-          width="100%"
-          style={{
-            maxHeight: '300px',
-            borderRadius: '8px',
-          }}
-        />
+      {(videoUrl || picturePreview) && (
+        <div className="px-4 pb-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {videoUrl && (
+              <div className="rounded-xl overflow-hidden border border-default-200 bg-content1 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-2 px-3 py-2 border-b border-default-200 bg-default-50">
+                  <Film className="w-4 h-4 text-primary" />
+                  <span className="text-xs font-medium text-default-600">
+                    Video Preview
+                  </span>
+                </div>
+                <div className="p-2 bg-black">
+                  <video
+                    src={videoUrl}
+                    controls
+                    className="w-full aspect-video rounded-md"
+                  />
+                </div>
+              </div>
+            )}
+            {picturePreview && (
+              <div className="rounded-xl overflow-hidden border border-default-200 bg-content1 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-2 px-3 py-2 border-b border-default-200 bg-default-50">
+                  <ImageIcon className="w-4 h-4 text-primary" />
+                  <span className="text-xs font-medium text-default-600">
+                    Cover Preview
+                  </span>
+                </div>
+                <div className="p-2 flex items-center justify-center bg-default-50/50 min-h-[120px]">
+                  <img
+                    src={picturePreview}
+                    alt="cover"
+                    className="w-full max-w-xs aspect-video object-cover rounded-md"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       )}
       <CardBody>
         <Form className="flex flex-col gap-4">
           <div className="flex flex-col gap-2 justify-center w-full">
             <div className="flex gap-4 items-center">
-              <label>Video:</label>
+              <label className="flex items-center gap-2 text-sm font-medium text-default-700 min-w-[64px]">
+                <Upload className="w-4 h-4 text-primary" />
+                Video
+              </label>
               <Input
                 type="file"
                 className="w-3/4"
                 onChange={handleUploadVideo}
               />
             </div>
-            {videoName && <div>Selected video: {videoName}</div>}
+            {videoName && (
+              <Chip
+                variant="flat"
+                color="primary"
+                size="sm"
+                startContent={<Film className="w-3 h-3 ml-1" />}
+                className="self-start"
+              >
+                {videoName}
+              </Chip>
+            )}
+            <div className="flex items-center gap-4">
+              <label className="flex items-center gap-2 text-sm font-medium text-default-700 min-w-[64px]">
+                <ImageIcon className="w-4 h-4 text-primary" />
+                Cover
+              </label>
+              <Input
+                type="file"
+                className="w-3/4"
+                onChange={handleUploadPicture}
+              />
+            </div>
+            {pictureName && (
+              <Chip
+                variant="flat"
+                color="secondary"
+                size="sm"
+                startContent={<ImageIcon className="w-3 h-3 ml-1" />}
+                className="self-start"
+              >
+                {pictureName}
+              </Chip>
+            )}
             <Progress
               aria-label="Uploading..."
               className="max-w-md"
@@ -298,25 +365,6 @@ export default function UploadVideo() {
               size="md"
               value={uploadProgress}
             />
-            {picturePreview && (
-              <img
-                src={picturePreview}
-                alt="cover"
-                style={{
-                  width: '300px',
-                  borderRadius: '8px',
-                }}
-              />
-            )}
-            <div className="flex items-center gap-4">
-              <label>Cover:</label>
-              <Input
-                type="file"
-                className="w-3/4"
-                onChange={handleUploadPicture}
-              />
-            </div>
-            {pictureName && <div>Selected cover: {pictureName}</div>}
           </div>
           <Input
             isRequired
