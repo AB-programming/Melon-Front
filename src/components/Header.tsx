@@ -1,18 +1,10 @@
 'use client';
 
 import {
-  addToast,
   Avatar,
   Button,
-  Form,
-  Input,
   Listbox,
   ListboxItem,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
   Navbar,
   NavbarBrand,
   NavbarContent,
@@ -20,7 +12,6 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-  useDisclosure,
   User as UserIcon,
 } from '@heroui/react';
 import { MelonLogo } from './MelonLogo';
@@ -34,7 +25,6 @@ import type { Introspect } from '@/utils/types';
 import { HttpCode } from '@/utils/types';
 import { useStore } from '@/utils/store';
 import { getUserRequest } from '@/api/userApi';
-import { createVideoRequest } from '@/api/videoApi';
 
 export function Header() {
   const router = useRouter();
@@ -47,13 +37,6 @@ export function Header() {
   const user = useStore((state) => state.user);
   const avatarVersion = useStore((state) => state.avatarVersion);
   const updateUser = useStore((state) => state.updateUser);
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const [video, setVideo] = useState<File | null>(null);
-  const [picture, setPicture] = useState<File | null>(null);
-  const [videoName, setVideoName] = useState('');
-  const [pictureName, setPictureName] = useState('');
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -96,67 +79,6 @@ export function Header() {
     window.location.href = `${process.env.NEXT_PUBLIC_BACKEND_URI}/logout`;
   }
 
-  async function handleUploadVideo(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (file) {
-      setVideoName(file.name);
-      setVideo(file);
-      event.target.value = '';
-    }
-  }
-
-  async function handleUploadPicture(
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) {
-    const file = event.target.files?.[0];
-    if (file) {
-      setPictureName(file.name);
-      setPicture(file);
-      event.target.value = '';
-    }
-  }
-
-  async function submitVideo(close: () => void) {
-    if (!video) {
-      addToast({
-        title: 'Warning',
-        description: 'Please select a video!',
-        color: 'warning',
-        variant: 'flat',
-      });
-      return;
-    }
-    if (!picture) {
-      addToast({
-        title: 'Warning',
-        description: 'Please select a cover!',
-        color: 'warning',
-        variant: 'flat',
-      });
-      return;
-    }
-    const result = await createVideoRequest(
-      video,
-      picture,
-      user.id,
-      title,
-      description,
-    );
-    if (result.code === HttpCode.OK) {
-      addToast({
-        title: 'Upload Successfully',
-        description: 'The video has been upload successfully',
-        color: 'success',
-        variant: 'flat',
-      });
-      close();
-      setVideo(null);
-      setVideoName('');
-      setTitle('');
-      setDescription('');
-    }
-  }
-
   return (
     <div className="fixed top-0 left-0 w-full h-16 z-10">
       <Navbar maxWidth="full">
@@ -168,11 +90,7 @@ export function Header() {
         <NavbarContent justify="end">
           {loginStatus && (
             <NavbarItem>
-              <Button
-                onPress={onOpen}
-                color="success"
-                variant="faded"
-              >
+              <Button onPress={() => router.push(`/upload-video`)} color="success" variant="faded">
                 <Send size={18} />
                 Upload video
               </Button>
@@ -267,70 +185,6 @@ export function Header() {
           </>
         </NavbarContent>
       </Navbar>
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">
-                Create my video
-              </ModalHeader>
-              <ModalBody>
-                <Form className="flex flex-col gap-4">
-                  <div className="flex flex-col gap-2 justify-center w-full">
-                    <div className="flex gap-4 items-center">
-                      <label>Video:</label>
-                      <Input
-                        type="file"
-                        className="w-3/4"
-                        onChange={handleUploadVideo}
-                      />
-                    </div>
-                    {videoName && <div>Selected video: {videoName}</div>}
-                    <div className="flex items-center gap-4">
-                      <label>Cover:</label>
-                      <Input
-                        type="file"
-                        className="w-3/4"
-                        onChange={handleUploadPicture}
-                      />
-                    </div>
-                    {pictureName && <div>Selected cover: {pictureName}</div>}
-                  </div>
-                  <Input
-                    isRequired
-                    errorMessage="Please enter a valid title"
-                    label="Title"
-                    labelPlacement="outside"
-                    name="title"
-                    placeholder="Enter your video title"
-                    type="text"
-                    value={title}
-                    onValueChange={setTitle}
-                  />
-                  <Input
-                    errorMessage="Please enter a valid description"
-                    label="Description"
-                    labelPlacement="outside"
-                    name="description"
-                    placeholder="Enter your video description"
-                    type="text"
-                    value={description}
-                    onValueChange={setDescription}
-                  />
-                </Form>
-              </ModalBody>
-              <ModalFooter>
-                <Button variant="ghost" onPress={onClose}>
-                  Cancel
-                </Button>
-                <Button color="primary" onPress={() => submitVideo(onClose)}>
-                  Create
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
     </div>
   );
 }

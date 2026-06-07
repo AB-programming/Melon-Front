@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import {
@@ -20,16 +20,17 @@ import {
   Tooltip,
   useDisclosure,
 } from '@heroui/react';
-import { Copy, FilePenLine, FileUp, House, StickyNote, Tv } from 'lucide-react';
+import { Copy, FilePenLine, FileUp, House, StickyNote, Tv, Users } from 'lucide-react';
 import { useStore } from '@/utils/store';
 import { updateUserRequest } from '@/api/userApi';
 import { HttpCode, User } from '@/utils/types';
 import { useAvatar } from '@/hooks/useAvatar';
 import { UserVideoList } from '@/components/UserVideoList';
 import { UserHome } from '@/components/UserHome';
+import { SubscribedUsers } from '@/components/SubscribedUsers';
 
 export default function Self() {
-  const localUser = JSON.parse(localStorage.getItem('user') ?? '') as User;
+  const localUser = JSON.parse(localStorage.getItem('user') ?? '{}') as User;
 
   const user = useStore((state) => state.user);
   const updateUser = useStore((state) => state.updateUser);
@@ -138,6 +139,17 @@ export default function Self() {
               }
             >
               3
+            </Tab>
+            <Tab
+              key="subscriptions"
+              title={
+                <div className="flex items-center space-x-2">
+                  <Users size={18} />
+                  <span>关注</span>
+                </div>
+              }
+            >
+              <SubscribedUsers />
             </Tab>
           </Tabs>
         </div>
