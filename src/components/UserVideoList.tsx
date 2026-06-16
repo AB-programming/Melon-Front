@@ -4,14 +4,25 @@ import Image from 'next/image';
 import { useStore } from '@/utils/store';
 import { useEffect, useState } from 'react';
 import { HttpCode, Video } from '@/utils/types';
-import { fetchUserVideoListRequest } from '@/api/videoApi';
-import { Card, CardBody } from '@heroui/react';
+import { deleteVideoRequest, fetchUserVideoListRequest } from '@/api/videoApi';
+import {
+  addToast,
+  Button,
+  Card,
+  CardBody, Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  useDisclosure,
+} from '@heroui/react';
 import { PlayCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export function UserVideoList() {
   const user = useStore(state => state.user);
   const [videoList, setVideoList] = useState<Video[]>([]);
+  const {isOpen, onOpen, onOpenChange} = useDisclosure();
 
   useEffect(() => {
     const fetchUserVideo = async () => {
@@ -24,6 +35,27 @@ export function UserVideoList() {
       fetchUserVideo().then();
     }
   }, [user]);
+
+  async function deleteVideo(onClose: () => void, id: string) {
+    const result = await deleteVideoRequest(id);
+    onClose();
+    if (result.code === HttpCode.OK && result.data) {
+      addToast({
+        title: 'Success',
+        description: 'Video deleted successfully!',
+        color: 'success',
+        variant: 'flat',
+      });
+      setVideoList(prev => prev.filter(video => video.id !== id));
+    } else {
+      addToast({
+        title: 'Failed',
+        description: 'Video deleted failed, please try again!',
+        color: 'danger',
+        variant: 'flat',
+      });
+    }
+  }
 
   return (
     <div className="mr-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -48,6 +80,27 @@ export function UserVideoList() {
             <h3 className="text-md line-clamp-2 font-medium">{video.title}</h3>
             <p className="text-sm text-muted-foreground font-extralight">2万次观看 &middot; 发布于 2024年7月18日</p>
           </CardBody>
+          <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+            <ModalContent>
+              {(onClose) => (
+                <>
+                  <ModalHeader className="flex flex-col gap-1">
+                    Delete Post
+                  </ModalHeader>
+                  <ModalBody>Do you want to delete this post?</ModalBody>
+                  <ModalFooter>
+                    <Button color="danger" variant="light" onPress={onClose}>
+                      No
+                    </Button>
+                    <Button color="primary" onPress={() => deleteVideo(onClose, video.id)}>
+                      Yes
+                    </Button>
+                  </ModalFooter>
+                </>
+              )}
+            </ModalContent>
+          </Modal>
+          <Button size="sm" color="danger" radius="lg" variant="light" onPress={onOpen}>删除视频</Button>
         </Card>
       )) : <>暂无作品</>}
     </div>

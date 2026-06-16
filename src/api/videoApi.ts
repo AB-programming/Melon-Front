@@ -221,6 +221,13 @@ async function checkMergeRequest(fileId: string) {
   return request<string>(`/video/checkMerge/${fileId}`, Method.GET, options);
 }
 
+async function deleteVideoRequest(videoId: string) {
+  const options: Options = {
+    token
+  }
+  return request<boolean>(`/video/${videoId}`, Method.DELETE, options);
+}
+
 export {
   createVideoRequest,
   isLikeRequest,
@@ -240,5 +247,6 @@ export {
   checkChunkRequest,
   uploadChunkRequest,
   mergeRequest,
-  checkMergeRequest
+  checkMergeRequest,
+  deleteVideoRequest
 };
