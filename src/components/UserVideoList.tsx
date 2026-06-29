@@ -85,9 +85,9 @@ export function UserVideoList() {
               {(onClose) => (
                 <>
                   <ModalHeader className="flex flex-col gap-1">
-                    Delete Post
+                    Delete Video
                   </ModalHeader>
-                  <ModalBody>Do you want to delete this post?</ModalBody>
+                  <ModalBody>Do you want to delete this video?</ModalBody>
                   <ModalFooter>
                     <Button color="danger" variant="light" onPress={onClose}>
                       No
