@@ -44,6 +44,7 @@ interface Comment {
   createdTime: string;
   likeCount: number;
   isLiked: boolean;
+  replyList: Reply[];
 }
 
 interface Reply {
@@ -52,6 +53,7 @@ interface Reply {
   content: string;
   type: 'c' | 'r';
   targetId: string;
+  targetUser: User;
   createdTime: string;
 }
 

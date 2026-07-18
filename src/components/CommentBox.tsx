@@ -41,9 +41,10 @@ export function CommentBox({
         submitCallback(result.data);
       }
     } else {
-      const result = await sendReplyRequest(user.id, comment.id, 'c', text);
+      const result = await sendReplyRequest(user.id, comment.id, comment?.id, 'c', text);
       if (result.code === HttpCode.OK) {
         setText('');
+        submitCallback(result.data);
       }
     }
   }

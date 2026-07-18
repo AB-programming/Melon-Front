@@ -166,6 +166,7 @@ async function fetchUserVideoListRequest(userId: string) {
 async function sendReplyRequest(
   userId: string,
   targetId: string,
+  commentId: string,
   type: 'c' | 'r',
   content: string,
 ) {
@@ -176,6 +177,7 @@ async function sendReplyRequest(
       targetId,
       type,
       content,
+      commentId,
     },
   };
   return request<Reply>('/video/reply', Method.POST, options);

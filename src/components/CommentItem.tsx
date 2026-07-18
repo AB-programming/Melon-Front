@@ -10,7 +10,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@heroui/react';
-import { Ellipsis, Flag, Reply as ReplyIcon, ThumbsUp, Trash2 } from 'lucide-react';
+import {
+  Ellipsis,
+  Flag,
+  Reply as ReplyIcon,
+  ThumbsUp,
+  Trash2,
+} from 'lucide-react';
 import { useStore } from '@/utils/store';
 import {
   addCommentLikeRequest,
@@ -19,6 +25,7 @@ import {
 } from '@/api/videoApi';
 import { CommentBox } from '@/components/CommentBox';
 import { useState } from 'react';
+import { ReplyItem } from '@/components/ReplyItem';
 
 interface CommentItemProps {
   comment: Comment;
@@ -33,6 +40,7 @@ export function CommentItem({
 }: CommentItemProps) {
   const user = useStore((state) => state.user);
   const [isShowReply, setIsShowReply] = useState(false);
+  const [localReplyList, setLocalReplyList] = useState<Reply[]>(comment.replyList);
 
   async function handleCommentLike(isLike: boolean, commentId: string) {
     if (user.id === '') {
@@ -64,9 +72,14 @@ export function CommentItem({
   }
 
   async function sendReplyCallback(reply: Comment | Reply) {
-    reply = reply as Reply;
-    // todo
-    // 发送回复成功之后的回调
+    const newReply = reply as Reply;
+    addToast({
+      title: '成功',
+      description: '回复发布成功',
+      color: 'success',
+    });
+    setLocalReplyList((prev) => [...prev, newReply]);
+    setIsShowReply(false);
   }
 
   return (
@@ -90,7 +103,7 @@ export function CommentItem({
               </Button>
             </PopoverTrigger>
             <PopoverContent>
-              <Listbox>
+              <Listbox disabledKeys={comment.user.id !== user.id ? ['delete'] : []}>
                 <ListboxItem
                   showDivider
                   key="new"
@@ -102,7 +115,6 @@ export function CommentItem({
                   key="delete"
                   className="text-danger"
                   color="danger"
-                  isDisabled={comment.user.id !== user.id}
                   startContent={<Trash2 size={18} />}
                   onPress={() => deleteComment(comment.id)}
                 >
@@ -154,6 +166,11 @@ export function CommentItem({
             cancelCallback={() => setIsShowReply(false)}
           />
         )}
+        <div>
+          {localReplyList.map((reply) => (
+            <ReplyItem key={reply.id} reply={reply} />
+          ))}
+        </div>
       </div>
     </div>
   );
