@@ -155,6 +155,13 @@ async function deleteCommentRequest(commentId: string) {
   return await request<void>('/video/comment', Method.DELETE, options);
 }
 
+async function deleteReplyRequest(replyId: string) {
+  const options: Options = {
+    token,
+  };
+  return await request<void>(`/video/reply/${replyId}`, Method.DELETE, options);
+}
+
 async function fetchUserVideoListRequest(userId: string) {
   return await request<Video[]>('/video/selectVideoListByUserId', Method.GET, {
     body: {
@@ -244,6 +251,7 @@ export {
   addCommentLikeRequest,
   cancelCommentLikeRequest,
   deleteCommentRequest,
+  deleteReplyRequest,
   fetchUserVideoListRequest,
   sendReplyRequest,
   checkChunkRequest,

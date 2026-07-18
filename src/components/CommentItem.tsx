@@ -6,9 +6,15 @@ import {
   cn,
   Listbox,
   ListboxItem,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
   Popover,
   PopoverContent,
   PopoverTrigger,
+  useDisclosure,
 } from '@heroui/react';
 import {
   Ellipsis,
@@ -22,6 +28,7 @@ import {
   addCommentLikeRequest,
   cancelCommentLikeRequest,
   deleteCommentRequest,
+  deleteReplyRequest,
 } from '@/api/videoApi';
 import { CommentBox } from '@/components/CommentBox';
 import { useState } from 'react';
@@ -41,6 +48,8 @@ export function CommentItem({
   const user = useStore((state) => state.user);
   const [isShowReply, setIsShowReply] = useState(false);
   const [localReplyList, setLocalReplyList] = useState<Reply[]>(comment.replyList);
+  const [pendingDeleteReplyId, setPendingDeleteReplyId] = useState<string | null>(null);
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   async function handleCommentLike(isLike: boolean, commentId: string) {
     if (user.id === '') {
@@ -69,6 +78,26 @@ export function CommentItem({
     if (result.code === HttpCode.OK) {
       deleteCommentCallback(commentId);
     }
+  }
+
+  function handleDeleteReplyClick(replyId: string) {
+    setPendingDeleteReplyId(replyId);
+    onOpen();
+  }
+
+  async function confirmDeleteReply(onClose: () => void) {
+    if (!pendingDeleteReplyId) return;
+    const result = await deleteReplyRequest(pendingDeleteReplyId);
+    if (result.code === HttpCode.OK) {
+      addToast({
+        title: '成功',
+        description: '回复已删除',
+        color: 'success',
+      });
+      setLocalReplyList((prev) => prev.filter((r) => r.id !== pendingDeleteReplyId));
+    }
+    setPendingDeleteReplyId(null);
+    onClose();
   }
 
   async function sendReplyCallback(reply: Comment | Reply) {
@@ -168,10 +197,30 @@ export function CommentItem({
         )}
         <div>
           {localReplyList.map((reply) => (
-            <ReplyItem key={reply.id} reply={reply} />
+            <ReplyItem key={reply.id} reply={reply} deleteReplyCallback={handleDeleteReplyClick} />
           ))}
         </div>
       </div>
+      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                确认删除
+              </ModalHeader>
+              <ModalBody>确定要删除这条回复吗？</ModalBody>
+              <ModalFooter>
+                <Button variant="light" onPress={onClose}>
+                  取消
+                </Button>
+                <Button color="danger" onPress={() => confirmDeleteReply(onClose)}>
+                  确认删除
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

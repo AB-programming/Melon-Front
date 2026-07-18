@@ -14,7 +14,7 @@ import { useStore } from '@/utils/store';
 
 interface ReplyItemProps {
   reply: Reply;
-  deleteReplyCallback?: (replyId: string) => void;
+  deleteReplyCallback: (replyId: string) => void;
 }
 
 export function ReplyItem({ reply, deleteReplyCallback }: ReplyItemProps) {
