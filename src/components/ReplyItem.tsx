@@ -15,9 +15,10 @@ import { useStore } from '@/utils/store';
 interface ReplyItemProps {
   reply: Reply;
   deleteReplyCallback: (replyId: string) => void;
+  onReplyClick?: (replyId: string) => void;
 }
 
-export function ReplyItem({ reply, deleteReplyCallback }: ReplyItemProps) {
+export function ReplyItem({ reply, deleteReplyCallback, onReplyClick }: ReplyItemProps) {
   const user = useStore((state) => state.user);
 
   return (
@@ -85,6 +86,7 @@ export function ReplyItem({ reply, deleteReplyCallback }: ReplyItemProps) {
               'h-7 px-2 text-xs font-normal transition-all duration-200',
               'hover:bg-green-50 hover:text-green-600 dark:hover:bg-green-950 dark:hover:text-green-400',
             )}
+            onPress={() => onReplyClick?.(reply.id)}
           >
             <ReplyIcon className="w-3.5 h-3.5" />
             回复

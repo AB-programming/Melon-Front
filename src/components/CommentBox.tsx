@@ -12,36 +12,40 @@ interface BaseProps {
 interface CommentProps extends BaseProps {
   type: 'comment';
   video: Video;
-  comment?: Comment;
 }
 
 interface ReplyProps extends BaseProps {
   type: 'reply';
-  comment: Comment;
-  video?: Video;
+  commentId: string;
+  targetId: string;
+  replyType: 'c' | 'r';
 }
 
 type CommentBoxProps = CommentProps | ReplyProps;
 
-export function CommentBox({
-  type,
-  video,
-  comment,
-  submitCallback,
-  cancelCallback,
-}: CommentBoxProps) {
+export function CommentBox(props: CommentBoxProps) {
+  const { type, submitCallback, cancelCallback } = props;
   const user = useStore((state) => state.user);
   const [text, setText] = useState('');
 
+  const textareaKey =
+    type === 'comment' ? props.video?.id : props.targetId;
+
   async function send() {
     if (type === 'comment') {
-      const result = await sendCommentRequest(user.id, video.id, text);
+      const result = await sendCommentRequest(user.id, props.video.id, text);
       if (result.code === HttpCode.OK) {
         setText('');
         submitCallback(result.data);
       }
     } else {
-      const result = await sendReplyRequest(user.id, comment.id, comment?.id, 'c', text);
+      const result = await sendReplyRequest(
+        user.id,
+        props.targetId,
+        props.commentId,
+        props.replyType,
+        text,
+      );
       if (result.code === HttpCode.OK) {
         setText('');
         submitCallback(result.data);
@@ -52,7 +56,7 @@ export function CommentBox({
   return (
     <div className="w-full flex flex-col gap-4">
       <Textarea
-        key={type === 'comment' ? video?.id : comment?.id}
+        key={textareaKey}
         labelPlacement="outside"
         placeholder={`Enter your ${type}`}
         variant="underlined"
