@@ -26,6 +26,15 @@ async function fetchPostListWithUserIdRequest(userId: string) {
   });
 }
 
+async function fetchFollowedPostsRequest(userId: string) {
+  return await request<Post[]>('/post/selectFollowedPosts', Method.GET, {
+    token,
+    body: {
+      userId,
+    },
+  });
+}
+
 async function addPostLikeRequest(userId: string, postId: string) {
   return await request<string>('/post/like', Method.POST, {
     token,
@@ -68,6 +77,7 @@ export {
   addPostRequest,
   fetchAllPostRequest,
   fetchPostListWithUserIdRequest,
+  fetchFollowedPostsRequest,
   addPostLikeRequest,
   deletePostLikeRequest,
   deletePostRequest,

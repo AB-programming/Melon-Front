@@ -155,6 +155,13 @@ async function deleteCommentRequest(commentId: string) {
   return await request<void>('/video/comment', Method.DELETE, options);
 }
 
+async function deleteReplyRequest(replyId: string) {
+  const options: Options = {
+    token,
+  };
+  return await request<void>(`/video/reply/${replyId}`, Method.DELETE, options);
+}
+
 async function fetchUserVideoListRequest(userId: string) {
   return await request<Video[]>('/video/selectVideoListByUserId', Method.GET, {
     body: {
@@ -166,6 +173,7 @@ async function fetchUserVideoListRequest(userId: string) {
 async function sendReplyRequest(
   userId: string,
   targetId: string,
+  commentId: string,
   type: 'c' | 'r',
   content: string,
 ) {
@@ -176,6 +184,7 @@ async function sendReplyRequest(
       targetId,
       type,
       content,
+      commentId,
     },
   };
   return request<Reply>('/video/reply', Method.POST, options);
@@ -221,6 +230,13 @@ async function checkMergeRequest(fileId: string) {
   return request<string>(`/video/checkMerge/${fileId}`, Method.GET, options);
 }
 
+async function deleteVideoRequest(videoId: string) {
+  const options: Options = {
+    token
+  }
+  return request<boolean>(`/video/${videoId}`, Method.DELETE, options);
+}
+
 export {
   createVideoRequest,
   isLikeRequest,
@@ -235,10 +251,12 @@ export {
   addCommentLikeRequest,
   cancelCommentLikeRequest,
   deleteCommentRequest,
+  deleteReplyRequest,
   fetchUserVideoListRequest,
   sendReplyRequest,
   checkChunkRequest,
   uploadChunkRequest,
   mergeRequest,
-  checkMergeRequest
+  checkMergeRequest,
+  deleteVideoRequest
 };

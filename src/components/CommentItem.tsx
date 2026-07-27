@@ -6,19 +6,33 @@ import {
   cn,
   Listbox,
   ListboxItem,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
   Popover,
   PopoverContent,
   PopoverTrigger,
+  useDisclosure,
 } from '@heroui/react';
-import { Ellipsis, Flag, Reply as ReplyIcon, ThumbsUp, Trash2 } from 'lucide-react';
+import {
+  Ellipsis,
+  Flag,
+  Reply as ReplyIcon,
+  ThumbsUp,
+  Trash2,
+} from 'lucide-react';
 import { useStore } from '@/utils/store';
 import {
   addCommentLikeRequest,
   cancelCommentLikeRequest,
   deleteCommentRequest,
+  deleteReplyRequest,
 } from '@/api/videoApi';
 import { CommentBox } from '@/components/CommentBox';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
+import { ReplyItem } from '@/components/ReplyItem';
 
 interface CommentItemProps {
   comment: Comment;
@@ -32,7 +46,15 @@ export function CommentItem({
   deleteCommentCallback,
 }: CommentItemProps) {
   const user = useStore((state) => state.user);
-  const [isShowReply, setIsShowReply] = useState(false);
+  const [localReplyList, setLocalReplyList] = useState<Reply[]>(comment.replyList ?? []);
+  const [pendingDelete, setPendingDelete] = useState<
+    { type: 'comment'; id: string } | { type: 'reply'; id: string } | null
+  >(null);
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [
+    replyContext,
+    setReplyContext,
+  ] = useState<{ type: 'comment' } | { type: 'reply'; replyId: string } | null>(null);
 
   async function handleCommentLike(isLike: boolean, commentId: string) {
     if (user.id === '') {
@@ -56,17 +78,52 @@ export function CommentItem({
     }
   }
 
-  async function deleteComment(commentId: string) {
-    const result = await deleteCommentRequest(commentId);
-    if (result.code === HttpCode.OK) {
-      deleteCommentCallback(commentId);
+  function handleDeleteReplyClick(replyId: string) {
+    setPendingDelete({ type: 'reply', id: replyId });
+    onOpen();
+  }
+
+  function handleDeleteCommentClick(commentId: string) {
+    setPendingDelete({ type: 'comment', id: commentId });
+    onOpen();
+  }
+
+  async function confirmDelete(onClose: () => void) {
+    if (!pendingDelete) return;
+    if (pendingDelete.type === 'comment') {
+      const result = await deleteCommentRequest(pendingDelete.id);
+      if (result.code === HttpCode.OK) {
+        addToast({
+          title: '成功',
+          description: '评论已删除',
+          color: 'success',
+        });
+        deleteCommentCallback(pendingDelete.id);
+      }
+    } else {
+      const result = await deleteReplyRequest(pendingDelete.id);
+      if (result.code === HttpCode.OK) {
+        addToast({
+          title: '成功',
+          description: '回复已删除',
+          color: 'success',
+        });
+        setLocalReplyList((prev) => prev.filter((r) => r.id !== pendingDelete.id));
+      }
     }
+    setPendingDelete(null);
+    onClose();
   }
 
   async function sendReplyCallback(reply: Comment | Reply) {
-    reply = reply as Reply;
-    // todo
-    // 发送回复成功之后的回调
+    const newReply = reply as Reply;
+    addToast({
+      title: '成功',
+      description: '回复发布成功',
+      color: 'success',
+    });
+    setLocalReplyList((prev) => [...prev, newReply]);
+    setReplyContext(null);
   }
 
   return (
@@ -90,7 +147,7 @@ export function CommentItem({
               </Button>
             </PopoverTrigger>
             <PopoverContent>
-              <Listbox>
+              <Listbox disabledKeys={comment.user.id !== user.id ? ['delete'] : []}>
                 <ListboxItem
                   showDivider
                   key="new"
@@ -98,14 +155,13 @@ export function CommentItem({
                 >
                   举报
                 </ListboxItem>
-                <ListboxItem
-                  key="delete"
-                  className="text-danger"
-                  color="danger"
-                  isDisabled={comment.user.id !== user.id}
-                  startContent={<Trash2 size={18} />}
-                  onPress={() => deleteComment(comment.id)}
-                >
+                  <ListboxItem
+                    key="delete"
+                    className="text-danger"
+                    color="danger"
+                    startContent={<Trash2 size={18} />}
+                    onPress={() => handleDeleteCommentClick(comment.id)}
+                  >
                   删除
                 </ListboxItem>
               </Listbox>
@@ -140,21 +196,71 @@ export function CommentItem({
               'h-7 px-2 text-xs font-normal transition-all duration-200',
               'hover:bg-green-50 hover:text-green-600 dark:hover:bg-green-950 dark:hover:text-green-400',
             )}
-            onPress={() => setIsShowReply(true)}
+            onPress={() => setReplyContext({ type: 'comment' })}
           >
             <ReplyIcon className="w-3.5 h-3.5" />
             回复
           </Button>
         </div>
-        {isShowReply && (
+        {replyContext?.type === 'comment' && (
           <CommentBox
             type="reply"
-            comment={comment}
+            commentId={comment.id}
+            targetId={comment.id}
+            replyType="c"
             submitCallback={sendReplyCallback}
-            cancelCallback={() => setIsShowReply(false)}
+            cancelCallback={() => setReplyContext(null)}
           />
         )}
+        <div>
+          {localReplyList?.map((reply) => (
+            <Fragment key={reply.id}>
+              <ReplyItem
+                reply={reply}
+                deleteReplyCallback={handleDeleteReplyClick}
+                onReplyClick={(replyId) => setReplyContext({ type: 'reply', replyId })}
+              />
+              {replyContext?.type === 'reply' &&
+                replyContext.replyId === reply.id && (
+                  <div className="ml-11 mt-2">
+                    <CommentBox
+                      type="reply"
+                      commentId={comment.id}
+                      targetId={reply.id}
+                      replyType="r"
+                      submitCallback={sendReplyCallback}
+                      cancelCallback={() => setReplyContext(null)}
+                    />
+                  </div>
+                )}
+            </Fragment>
+          ))}
+        </div>
       </div>
+      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                确认删除
+              </ModalHeader>
+              <ModalBody>
+                {pendingDelete?.type === 'comment'
+                  ? '确定要删除这条评论吗？'
+                  : '确定要删除这条回复吗？'}
+              </ModalBody>
+              <ModalFooter>
+                <Button variant="light" onPress={onClose}>
+                  取消
+                </Button>
+                <Button color="danger" onPress={() => confirmDelete(onClose)}>
+                  确认删除
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

@@ -2,10 +2,11 @@
 
 import { PostTabs } from '@/components/PostTabs';
 import { PostBody } from '@/components/PostBody';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { HttpCode, HttpResponse, Post } from '@/utils/types';
 import {
   fetchAllPostRequest,
+  fetchFollowedPostsRequest,
   fetchPostListWithUserIdRequest,
 } from '@/api/postApi';
 import { useStore } from '@/utils/store';
@@ -13,9 +14,11 @@ import { PostContext } from '@/context/PostContext';
 
 export function PostContainer() {
   const [postList, setPostList] = useState<Post[]>([]);
+  const [activeTab, setActiveTab] = useState<'discover' | 'follow'>('discover');
   const user = useStore((state) => state.user);
 
-  // Update the like status after liking a post
+  const isLoggedIn = user.id !== '';
+
   function handleAddPostLike(postId: string) {
     setPostList(prevPosts =>
       prevPosts.map(post =>
@@ -26,7 +29,6 @@ export function PostContainer() {
     );
   }
 
-  // Update the like status after unliking a post
   function handleRemovePostLike(postId: string) {
     setPostList(prevPosts =>
       prevPosts.map(post =>
@@ -37,36 +39,51 @@ export function PostContainer() {
     );
   }
 
-  // Re-render the page after delete a post
   function handleDeletePost(postId: string) {
     setPostList(prevPosts => prevPosts.filter(post => post.id !== postId));
   }
 
-  async function addPostCallback(post: Post) {
-    setPostList([post, ...postList]);
+  function addPostCallback(post: Post) {
+    if (activeTab === 'discover') {
+      setPostList(prev => [post, ...prev]);
+    }
   }
 
-  useEffect(() => {
-    const initPostList = async () => {
+  function handleTabChange(tab: string) {
+    if (tab === 'discover' || tab === 'follow') {
+      setActiveTab(tab);
+    }
+  }
+
+  const initPostList = useCallback(async () => {
+    let result: HttpResponse<Post[]>;
+    if (activeTab === 'discover') {
       const loginStatus = localStorage.getItem('login_status');
-      let result: HttpResponse<Post[]>;
-      if (loginStatus === 'true') {
+      if (loginStatus === 'true' && user.id) {
         result = await fetchPostListWithUserIdRequest(user.id);
       } else {
         result = await fetchAllPostRequest();
       }
-      if (result.code === HttpCode.OK) {
-        setPostList(result.data);
-      }
-    };
+    } else {
+      result = await fetchFollowedPostsRequest(user.id);
+    }
+    if (result.code === HttpCode.OK) {
+      setPostList(result.data);
+    }
+  }, [activeTab, user.id]);
+
+  useEffect(() => {
     initPostList().then();
-  }, [user.id]);
+  }, [initPostList]);
 
   return (
     <>
-      {/* tab section */}
-      <PostTabs addPostCallbackAction={addPostCallback} />
-      {/* body section */}
+      <PostTabs
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        isLoggedIn={isLoggedIn}
+        addPostCallbackAction={addPostCallback}
+      />
       <PostContext.Provider value={{ postList, handleAddPostLike, handleRemovePostLike, handleDeletePost }}>
         <PostBody />
       </PostContext.Provider>

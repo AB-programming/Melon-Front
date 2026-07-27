@@ -26,10 +26,13 @@ interface ImageFile {
 }
 
 interface PostTabsProps {
+  activeTab: 'discover' | 'follow';
+  onTabChange: (tab: string) => void;
+  isLoggedIn: boolean;
   addPostCallbackAction: (post: Post) => void;
 }
 
-export function PostTabs({ addPostCallbackAction }: PostTabsProps) {
+export function PostTabs({ activeTab, onTabChange, isLoggedIn, addPostCallbackAction }: PostTabsProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [images, setImages] = useState<ImageFile[]>([]);
   const [content, setContent] = useState('');
@@ -96,7 +99,7 @@ export function PostTabs({ addPostCallbackAction }: PostTabsProps) {
 
   return (
     <div className="flex justify-between mb-4 px-3">
-      <Tabs color="secondary" variant="bordered">
+      <Tabs selectedKey={activeTab} onSelectionChange={(key) => onTabChange(String(key))} color="secondary" variant="bordered">
         <Tab
           key="discover"
           title={
@@ -106,15 +109,17 @@ export function PostTabs({ addPostCallbackAction }: PostTabsProps) {
             </div>
           }
         />
-        <Tab
-          key="follow"
-          title={
-            <div className="flex items-center space-x-2">
-              <UserRoundPlus />
-              <span>关注</span>
-            </div>
-          }
-        />
+        {isLoggedIn && (
+          <Tab
+            key="follow"
+            title={
+              <div className="flex items-center space-x-2">
+                <UserRoundPlus />
+                <span>关注</span>
+              </div>
+            }
+          />
+        )}
       </Tabs>
       <Button onPress={onOpen} variant="shadow" radius="full" color="primary">
         <Plus size={18} />
