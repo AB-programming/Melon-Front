@@ -19,7 +19,7 @@ export function Sidebar() {
         短视频
       </Link>
       <Link
-        href="/simple"
+        href="/subscription"
         className="px-2 py-2 hover:bg-gray-200 rounded-lg transition delay-50 duration-300 ease-in-out"
         color="foreground"
       >

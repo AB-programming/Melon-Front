@@ -1,6 +1,6 @@
 # Melon-Front
 
-> 作者：[AB-programming](https://github.com/AB-programming/)
+> Author: [AB-programming](https://github.com/AB-programming/)
 
 This repository contains the Melon frontend code.
 
