@@ -194,8 +194,8 @@ async function checkChunkRequest(fileMd5: string) {
   const options: Options = {
     token,
     body: {
-      fileMd5
-    }
+      fileMd5,
+    },
   };
   return request<number[]>('/video/check', Method.POST, options);
 }
@@ -217,24 +217,32 @@ async function mergeRequest(fileMd5: string, id: string) {
     token,
     body: {
       fileMd5,
-      id
-    }
+      id,
+    },
   };
   return request<boolean>('/video/merge', Method.POST, options);
 }
 
 async function checkMergeRequest(fileId: string) {
   const options: Options = {
-    token
-  }
+    token,
+  };
   return request<string>(`/video/checkMerge/${fileId}`, Method.GET, options);
 }
 
 async function deleteVideoRequest(videoId: string) {
   const options: Options = {
-    token
-  }
+    token,
+  };
   return request<boolean>(`/video/${videoId}`, Method.DELETE, options);
+}
+
+async function getFollowVideoListRequest(userId: string) {
+  const options: Options = {
+    token,
+    body: { userId },
+  };
+  return request<Video[]>('/video/getFollowVideoList', Method.GET, options);
 }
 
 export {
@@ -258,5 +266,6 @@ export {
   uploadChunkRequest,
   mergeRequest,
   checkMergeRequest,
-  deleteVideoRequest
+  deleteVideoRequest,
+  getFollowVideoListRequest
 };
