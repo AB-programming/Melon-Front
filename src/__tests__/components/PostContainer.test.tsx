@@ -3,6 +3,11 @@ import React from 'react';
 import { PostContainer } from '@/components/PostContainer';
 import { userEvent } from '@testing-library/user-event';
 
+jest.mock('@/api/postApi', () => {
+  const { createPostApiMock } = require('@/test/mocks/postApi');
+  return createPostApiMock();
+});
+
 describe('PostContainer', () => {
   it('Like a post', async () => {
     localStorage.setItem('login_status', 'true');

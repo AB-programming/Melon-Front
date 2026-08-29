@@ -9,6 +9,15 @@ jest.mock('next-video', () => {
   };
 });
 
+jest.mock('@/api/videoApi', () => {
+  const { createVideoApiMock } = require('@/test/mocks/videoApi');
+  return createVideoApiMock();
+});
+jest.mock('@/api/userApi', () => {
+  const { createUserApiMock } = require('@/test/mocks/userApi');
+  return createUserApiMock();
+});
+
 describe('MelonVideo', () => {
   it('Like a video', async () => {
     localStorage.setItem('login_status', 'true');
