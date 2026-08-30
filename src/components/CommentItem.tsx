@@ -147,7 +147,7 @@ export function CommentItem({
               </Button>
             </PopoverTrigger>
             <PopoverContent>
-              <Listbox disabledKeys={comment.user.id !== user.id ? ['delete'] : []}>
+              <Listbox aria-label="More options menu" disabledKeys={comment.user.id !== user.id ? ['delete'] : []}>
                 <ListboxItem
                   showDivider
                   key="new"

@@ -62,9 +62,17 @@ export function createVideoApiMock() {
         message: 'OK',
         data: {
           id: 'comment_id',
-          content: '',
+          user: {
+            id: 'test_user_id',
+            username: 'test_user',
+            nickname: 'Tester',
+            avatarUrl: 'https://example.com/avatar.png',
+          },
+          content: 'test comment',
+          createdTime: '',
           likeCount: 0,
-          isLike: false,
+          isLiked: false,
+          replyList: [],
         },
       } as HttpResponse<Comment>);
     }),
@@ -107,16 +115,38 @@ export function createVideoApiMock() {
         data: [],
       } as HttpResponse<Video[]>);
     }),
-    sendReplyRequest: jest.fn(() => {
-      return Promise.resolve({
-        code: HttpCode.OK,
-        message: 'OK',
-        data: {
-          id: 'reply_id',
-          content: '',
-        },
-      } as HttpResponse<Reply>);
-    }),
+    sendReplyRequest: jest.fn(
+      (
+        userId: string,
+        targetId: string,
+        commentId: string,
+        type: 'c' | 'r',
+        content: string,
+      ) => {
+        return Promise.resolve({
+          code: HttpCode.OK,
+          message: 'OK',
+          data: {
+            id: 'new_reply_id',
+            user: {
+              id: userId,
+              username: 'test_user',
+              nickname: 'Tester',
+              avatarUrl: 'https://example.com/avatar.png',
+            },
+            content,
+            type,
+            targetId,
+            targetUser: {
+              id: targetId,
+              username: 'target_user',
+              nickname: 'Target',
+            },
+            createdTime: '',
+          },
+        } as HttpResponse<Reply>);
+      },
+    ),
     checkChunkRequest: jest.fn(() => {
       return Promise.resolve({
         code: HttpCode.OK,

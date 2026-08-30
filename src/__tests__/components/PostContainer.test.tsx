@@ -4,6 +4,7 @@ import { PostContainer } from '@/components/PostContainer';
 import { userEvent } from '@testing-library/user-event';
 
 jest.mock('@/api/postApi', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { createPostApiMock } = require('@/test/mocks/postApi');
   return createPostApiMock();
 });
