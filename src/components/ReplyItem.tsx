@@ -42,7 +42,7 @@ export function ReplyItem({ reply, deleteReplyCallback, onReplyClick }: ReplyIte
               </Button>
             </PopoverTrigger>
             <PopoverContent>
-              <Listbox disabledKeys={reply.user.id !== user.id ? ['delete'] : []}>
+              <Listbox aria-label="More options menu" disabledKeys={reply.user.id !== user.id ? ['delete'] : []}>
                 <ListboxItem
                   showDivider
                   key="new"
