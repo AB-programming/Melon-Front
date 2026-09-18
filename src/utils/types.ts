@@ -67,4 +67,27 @@ interface Post {
   likeCount: number;
 }
 
-export type { HttpResponse, User, Introspect, Video, Comment, Reply, Post };
+interface PageResult<T> {
+  records: T[];
+  total: number;
+  pageNum: number;
+  pageSize: number;
+}
+
+interface SearchAllResult {
+  videos: PageResult<Video>;
+  users: PageResult<User>;
+  posts: PageResult<Post>;
+}
+
+export type {
+  HttpResponse,
+  User,
+  Introspect,
+  Video,
+  Comment,
+  Reply,
+  Post,
+  PageResult,
+  SearchAllResult,
+};

@@ -2,9 +2,14 @@ import { Video } from '@/utils/types';
 import Link from 'next/link';
 import Image from 'next/image';
 
-export async function VideoList({ videoList }: { videoList: Video[] }) {
+interface VideoListProps {
+  videoList: Video[];
+  className?: string;
+}
+
+export function VideoList({ videoList, className }: VideoListProps) {
   return (
-    <div className="grid grid-cols-3 gap-4 px-8 py-4 mb-16">
+    <div className={className ?? 'grid grid-cols-3 gap-4 px-8 py-4 mb-16'}>
       {videoList.map((video) => (
         <div key={video.id} className="flex flex-col gap-4">
           <Link href={`/watch?v=${video.id}`}>
