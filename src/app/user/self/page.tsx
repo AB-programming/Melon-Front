@@ -68,7 +68,6 @@ export default function Self() {
       return;
     }
     const result = await updateUserRequest(
-      user.id,
       nickname,
       signature,
       introduction,

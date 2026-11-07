@@ -65,7 +65,7 @@ export function MelonVideo({ video }: MelonVideoProps) {
 
   useEffect(() => {
     const fetchIsLike = async () => {
-      const result = await isLikeRequest(user.id, video.id);
+      const result = await isLikeRequest(video.id);
       if (result.code === HttpCode.OK) {
         setIsLike(result.data);
       }
@@ -84,7 +84,7 @@ export function MelonVideo({ video }: MelonVideoProps) {
 
   useEffect(() => {
     const fetchIsCollect = async () => {
-      const result = await isCollectRequest(user.id, video.id);
+      const result = await isCollectRequest(video.id);
       if (result.code === HttpCode.OK) {
         setIsCollect(result.data);
       }
@@ -96,7 +96,7 @@ export function MelonVideo({ video }: MelonVideoProps) {
 
   useEffect(() => {
     const fetchIsSubscribed = async function () {
-      const result = await isSubscribedRequest(user.id, video.author.id);
+      const result = await isSubscribedRequest(video.author.id);
       setIsSubscribed(result.data);
     };
     if (
@@ -132,7 +132,7 @@ export function MelonVideo({ video }: MelonVideoProps) {
       });
     }
     if (isSubscribed) {
-      const result = await cancelSubscriptionRequest(user.id, video.author.id);
+      const result = await cancelSubscriptionRequest(video.author.id);
       if (result.code === HttpCode.OK) {
         setIsSubscribed(!isSubscribed);
         setFans(fans - 1);
@@ -143,7 +143,7 @@ export function MelonVideo({ video }: MelonVideoProps) {
         });
       }
     } else {
-      const result = await addSubscriptionRequest(user.id, video.author.id);
+      const result = await addSubscriptionRequest(video.author.id);
       if (result.code === HttpCode.OK) {
         setIsSubscribed(!isSubscribed);
         setFans(fans + 1);
@@ -159,14 +159,14 @@ export function MelonVideo({ video }: MelonVideoProps) {
   async function handleLike() {
     let result;
     if (isLike) {
-      result = await cancelLikeRequest(user.id, video.id);
+      result = await cancelLikeRequest(video.id);
       if (result.code === HttpCode.OK) {
         setIsLike(false);
         setLikeCount(likeCount - 1);
         return true;
       }
     } else {
-      result = await addLikeRequest(user.id, video.id);
+      result = await addLikeRequest(video.id);
       if (result.code === HttpCode.OK) {
         setIsLike(true);
         setLikeCount(likeCount + 1);
@@ -179,13 +179,13 @@ export function MelonVideo({ video }: MelonVideoProps) {
   async function handleCollect() {
     let result;
     if (isCollect) {
-      result = await cancelCollectRequest(user.id, video.id);
+      result = await cancelCollectRequest(video.id);
       if (result.code === HttpCode.OK) {
         setIsCollect(false);
         return true;
       }
     } else {
-      result = await addCollectRequest(user.id, video.id);
+      result = await addCollectRequest(video.id);
       if (result.code === HttpCode.OK) {
         setIsCollect(true);
         return true;

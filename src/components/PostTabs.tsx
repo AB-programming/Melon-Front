@@ -78,7 +78,7 @@ export function PostTabs({ activeTab, onTabChange, isLoggedIn, addPostCallbackAc
   // submit a post
   const handleSubmit = async (onClose: () => void) => {
     const files = images.map((img) => img.file);
-    const result = await addPostRequest(user.id, content, files);
+    const result = await addPostRequest(content, files);
     if (result.code === HttpCode.OK) {
       addToast({
         title: 'Successfully',

@@ -42,7 +42,7 @@ export default function InfoComplete({
   async function submitComplete(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = Object.fromEntries(new FormData(e.currentTarget));
-    const result = await updateUserRequest(user.id, formData.nickname as string, formData.signature as string, '', '', '', '');
+    const result = await updateUserRequest(formData.nickname as string, formData.signature as string, '', '', '', '');
     if (result.code === HttpCode.OK) {
       addToast({
         title: 'Success',

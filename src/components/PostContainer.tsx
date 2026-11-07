@@ -65,7 +65,7 @@ export function PostContainer() {
         result = await fetchAllPostRequest();
       }
     } else {
-      result = await fetchFollowedPostsRequest(user.id);
+        result = await fetchFollowedPostsRequest();
     }
     if (result.code === HttpCode.OK) {
       setPostList(result.data);

@@ -30,7 +30,7 @@ export function useAvatar(user: User) {
       });
       return;
     }
-    const result = await uploadAvatarRequest(avatar, user.id);
+    const result = await uploadAvatarRequest(avatar);
     if (result.code === HttpCode.OK) {
       addToast({
         title: 'Upload Successfully',

@@ -66,12 +66,12 @@ export function CommentItem({
       return;
     }
     if (isLike) {
-      const result = await cancelCommentLikeRequest(user.id, commentId);
+      const result = await cancelCommentLikeRequest(commentId);
       if (result.code === HttpCode.OK) {
         commentLikeCallback(isLike, commentId);
       }
     } else {
-      const result = await addCommentLikeRequest(user.id, commentId);
+      const result = await addCommentLikeRequest(commentId);
       if (result.code === HttpCode.OK) {
         commentLikeCallback(isLike, commentId);
       }
@@ -147,7 +147,7 @@ export function CommentItem({
               </Button>
             </PopoverTrigger>
             <PopoverContent>
-              <Listbox disabledKeys={comment.user.id !== user.id ? ['delete'] : []}>
+              <Listbox aria-label="More options menu" disabledKeys={comment.user.id !== user.id ? ['delete'] : []}>
                 <ListboxItem
                   showDivider
                   key="new"

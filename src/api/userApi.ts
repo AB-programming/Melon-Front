@@ -11,13 +11,9 @@ async function getUserRequest(userId: string) {
   return await request<User>(`/user/${userId}`, Method.GET, options);
 }
 
-async function uploadAvatarRequest(
-  file: File,
-  userId: string,
-): Promise<HttpResponse<string>> {
+async function uploadAvatarRequest(file: File): Promise<HttpResponse<string>> {
   const formData = new FormData();
   formData.append('file', file);
-  formData.append('userId', userId);
   const options: Options = {
     token,
     body: formData,
@@ -26,7 +22,6 @@ async function uploadAvatarRequest(
 }
 
 async function updateUserRequest(
-  userId: string,
   nickname: string,
   signature: string,
   introduction: string,
@@ -45,7 +40,7 @@ async function updateUserRequest(
       interest
     },
   };
-  return await request<User>(`/user/${userId}`, Method.PUT, options);
+  return await request<User>('/user/updateUser', Method.PUT, options);
 }
 
 async function createUserRequest(username: string, password: string) {
@@ -58,33 +53,30 @@ async function createUserRequest(username: string, password: string) {
   return await request<User>('/user/createUser', Method.POST, options);
 }
 
-async function addSubscriptionRequest(subscriber: string, target: string) {
+async function addSubscriptionRequest(target: string) {
   const options: Options = {
     token,
     body: {
-      subscriber,
       target,
     },
   };
   return await request<string>('/user/subscription', Method.POST, options);
 }
 
-async function cancelSubscriptionRequest(subscriber: string, target: string) {
+async function cancelSubscriptionRequest(target: string) {
   const options: Options = {
     token,
     body: {
-      subscriber,
       target,
     },
   };
   return await request<void>('/user/subscription', Method.DELETE, options);
 }
 
-async function isSubscribedRequest(subscriber: string, targetId: string) {
+async function isSubscribedRequest(targetId: string) {
   const options: Options = {
     token,
     body: {
-      subscriber,
       targetId,
     },
   };
@@ -104,12 +96,9 @@ async function getFansRequest(userId: string) {
   return await request<number>('/user/subscription/getFans', Method.GET, options);
 }
 
-async function getSubscriptionsRequest(subscriber: string) {
+async function getSubscriptionsRequest() {
   const options: Options = {
     token,
-    body: {
-      subscriber,
-    },
   };
   return await request<Array<SubscribedUser>>(
     '/user/subscription/getMySubscriptions',

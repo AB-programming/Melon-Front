@@ -203,7 +203,6 @@ export default function UploadVideo() {
 
     const result = await createVideoRequest(
       picture,
-      user.id,
       title,
       description,
     );

@@ -57,12 +57,12 @@ export function PostItem({ post }: PostItemProps) {
       return;
     }
     if (post.isLike) {
-      const result = await deletePostLikeRequest(user.id, post.id);
+      const result = await deletePostLikeRequest(post.id);
       if (result.code === HttpCode.OK) {
         postContext.handleRemovePostLike(post.id);
       }
     } else {
-      const result = await addPostLikeRequest(user.id, post.id);
+      const result = await addPostLikeRequest(post.id);
       if (result.code === HttpCode.OK) {
         postContext.handleAddPostLike(post.id);
       }

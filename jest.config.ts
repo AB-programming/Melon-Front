@@ -16,6 +16,15 @@ const config: Config = {
     // ...
     '^@/(.*)$': '<rootDir>/src/$1',
   },
+  modulePathIgnorePatterns: ['<rootDir>/\\.next'],
+  collectCoverageFrom: [
+    'src/**/*.{ts,tsx}',
+    '!src/app/**',
+    '!src/fonts/**',
+    '!src/test/**',
+    '!src/utils/types.ts',
+    '!src/**/*.d.ts',
+  ],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   transform: {}
 };
