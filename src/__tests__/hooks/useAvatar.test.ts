@@ -70,7 +70,7 @@ describe('useAvatar', () => {
       await result.current.submitAvatar();
     });
     await waitFor(() => {
-      expect(uploadAvatarRequest).toHaveBeenCalledWith(file, user.id);
+      expect(uploadAvatarRequest).toHaveBeenCalledWith(file);
     });
     expect(addToast).toHaveBeenCalledWith(
       expect.objectContaining({ title: 'Upload Successfully', color: 'success' }),

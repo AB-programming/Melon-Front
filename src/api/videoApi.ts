@@ -5,13 +5,11 @@ const token = localStorage.getItem('access_token') ?? '';
 
 async function createVideoRequest(
   picture: File,
-  userId: string,
   title: string,
   description: string,
 ) {
   const formData = new FormData();
   formData.append('picture', picture);
-  formData.append('userId', userId);
   formData.append('title', title);
   formData.append('description', description);
   const options: Options = {
@@ -21,33 +19,30 @@ async function createVideoRequest(
   return await request<string>('/video/createVideo', Method.POST, options);
 }
 
-async function isLikeRequest(userId: string, videoId: string) {
+async function isLikeRequest(videoId: string) {
   const options: Options = {
     token,
     body: {
-      userId,
       videoId,
     },
   };
   return await request<boolean>('/video/like/isLike', Method.GET, options);
 }
 
-async function addLikeRequest(userId: string, videoId: string) {
+async function addLikeRequest(videoId: string) {
   const options: Options = {
     token,
     body: {
-      userId,
       videoId,
     },
   };
   return await request<string>('/video/like', Method.POST, options);
 }
 
-async function cancelLikeRequest(userId: string, videoId: string) {
+async function cancelLikeRequest(videoId: string) {
   const options: Options = {
     token,
     body: {
-      userId,
       videoId,
     },
   };
@@ -63,33 +58,30 @@ async function getVideoCountRequest(videoId: string) {
   return await request<number>('/video/like/count', Method.GET, options);
 }
 
-async function addCollectRequest(userId: string, videoId: string) {
+async function addCollectRequest(videoId: string) {
   const options: Options = {
     token,
     body: {
-      userId,
       videoId,
     },
   };
   return await request<string>('/video/collect', Method.POST, options);
 }
 
-async function cancelCollectRequest(userId: string, videoId: string) {
+async function cancelCollectRequest(videoId: string) {
   const options: Options = {
     token,
     body: {
-      userId,
       videoId,
     },
   };
   return await request<void>('/video/collect', Method.DELETE, options);
 }
 
-async function isCollectRequest(userId: string, videoId: string) {
+async function isCollectRequest(videoId: string) {
   const options: Options = {
     token,
     body: {
-      userId,
       videoId,
     },
   };
@@ -100,15 +92,10 @@ async function isCollectRequest(userId: string, videoId: string) {
   );
 }
 
-async function sendCommentRequest(
-  userId: string,
-  videoId: string,
-  content: string,
-) {
+async function sendCommentRequest(videoId: string, content: string) {
   const options: Options = {
     token,
     body: {
-      userId,
       videoId,
       content,
     },
@@ -116,29 +103,27 @@ async function sendCommentRequest(
   return await request<Comment>('/video/comment', Method.POST, options);
 }
 
-async function fetchCommentListRequest(userId: string, videoId: string) {
+async function fetchCommentListRequest(videoId: string) {
   return await request<Comment[]>(
-    `/video/comment/list?userId=${userId}&videoId=${videoId}`,
+    `/video/comment/list?videoId=${videoId}`,
     Method.GET,
   );
 }
 
-async function addCommentLikeRequest(userId: string, commentId: string) {
+async function addCommentLikeRequest(commentId: string) {
   const options: Options = {
     token,
     body: {
-      userId,
       commentId,
     },
   };
   return await request<string>('/video/commentLike', Method.POST, options);
 }
 
-async function cancelCommentLikeRequest(userId: string, commentId: string) {
+async function cancelCommentLikeRequest(commentId: string) {
   const options: Options = {
     token,
     body: {
-      userId,
       commentId,
     },
   };
@@ -171,7 +156,6 @@ async function fetchUserVideoListRequest(userId: string) {
 }
 
 async function sendReplyRequest(
-  userId: string,
   targetId: string,
   commentId: string,
   type: 'c' | 'r',
@@ -180,7 +164,6 @@ async function sendReplyRequest(
   const options: Options = {
     token,
     body: {
-      userId,
       targetId,
       type,
       content,
@@ -237,10 +220,9 @@ async function deleteVideoRequest(videoId: string) {
   return request<boolean>(`/video/${videoId}`, Method.DELETE, options);
 }
 
-async function getFollowVideoListRequest(userId: string) {
+async function getFollowVideoListRequest() {
   const options: Options = {
     token,
-    body: { userId },
   };
   return request<Video[]>('/video/getFollowVideoList', Method.GET, options);
 }

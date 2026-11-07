@@ -60,7 +60,7 @@ describe('SubscribedUsers', () => {
     const buttons = screen.getAllByRole('button');
     await userEvent.click(buttons[0]);
     await waitFor(() => {
-      expect(cancelSubscriptionRequest).toHaveBeenCalledWith('test_user_id', 'sub_user_1');
+      expect(cancelSubscriptionRequest).toHaveBeenCalledWith('sub_user_1');
     });
     await waitFor(() => {
       expect(screen.queryByText('User One')).not.toBeInTheDocument();

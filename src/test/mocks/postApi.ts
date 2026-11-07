@@ -28,14 +28,14 @@ const likedPost: Post = {
 
 export function createPostApiMock() {
   return {
-    addPostRequest: jest.fn((userId: string, content: string) => {
+    addPostRequest: jest.fn((content: string) => {
       return Promise.resolve({
         code: HttpCode.OK,
         message: 'OK',
         data: {
           id: 'new_post_id',
           user: {
-            id: userId,
+            id: 'test_user_id',
             username: 'username',
             nickname: 'nickname',
           },

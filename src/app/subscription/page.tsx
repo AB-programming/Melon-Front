@@ -14,7 +14,7 @@ export default function Subscription() {
   useEffect(() => {
     const fetchVideoList = async () => {
       if (user.id === '') return;
-      const result = await getFollowVideoListRequest(user.id);
+      const result = await getFollowVideoListRequest();
       if (result.code === HttpCode.OK) {
         setVideoList(result.data);
       }

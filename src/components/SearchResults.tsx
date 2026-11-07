@@ -65,7 +65,7 @@ export function SearchResults() {
 
     async function load() {
       if (activeTab === 'all') {
-        const result = await searchAllRequest(keyword, user.id || undefined);
+        const result = await searchAllRequest(keyword);
         if (!cancelled && result.code === HttpCode.OK) {
           setAllResult(result.data);
         }
@@ -88,12 +88,11 @@ export function SearchResults() {
           setUserResult(result.data);
         }
       } else {
-        const result = await searchPostRequest(
-          keyword,
-          postPageNum,
-          POST_PAGE_SIZE,
-          user.id || undefined,
-        );
+      const result = await searchPostRequest(
+        keyword,
+        postPageNum,
+        POST_PAGE_SIZE,
+      );
         if (!cancelled && result.code === HttpCode.OK) {
           setPostResult(result.data);
         }

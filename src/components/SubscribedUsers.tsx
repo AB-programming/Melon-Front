@@ -35,7 +35,7 @@ export function SubscribedUsers() {
 
   useEffect(() => {
     async function fetchSubscriptions() {
-      const result = await getSubscriptionsRequest(user.id);
+      const result = await getSubscriptionsRequest();
       if (result.code === HttpCode.OK && result.data) {
         setSubscribedList(result.data);
       }
@@ -46,7 +46,7 @@ export function SubscribedUsers() {
   }, [user.id]);
 
   async function handleUnsubscribe(targetId: string) {
-    const result = await cancelSubscriptionRequest(user.id, targetId);
+    const result = await cancelSubscriptionRequest(targetId);
     if (result.code === HttpCode.OK) {
       setSubscribedList((prev) => prev.filter((u) => u.id !== targetId));
     }

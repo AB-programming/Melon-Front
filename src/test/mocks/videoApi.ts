@@ -117,7 +117,6 @@ export function createVideoApiMock() {
     }),
     sendReplyRequest: jest.fn(
       (
-        userId: string,
         targetId: string,
         commentId: string,
         type: 'c' | 'r',
@@ -129,7 +128,7 @@ export function createVideoApiMock() {
           data: {
             id: 'new_reply_id',
             user: {
-              id: userId,
+              id: 'test_user_id',
               username: 'test_user',
               nickname: 'Tester',
               avatarUrl: 'https://example.com/avatar.png',

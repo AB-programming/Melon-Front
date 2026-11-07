@@ -40,7 +40,7 @@ export function PostContent({ postId }: PostContentProps) {
       return;
     }
     if (post !== null && post.isLike) {
-      const deleteResult = await deletePostLikeRequest(user.id, postId);
+      const deleteResult = await deletePostLikeRequest(postId);
       if (deleteResult.code === HttpCode.OK) {
         setPost(prevState => {
           if (prevState) {
@@ -55,7 +55,7 @@ export function PostContent({ postId }: PostContentProps) {
         });
       }
     } else {
-      const addResult= await addPostLikeRequest(user.id, postId);
+      const addResult= await addPostLikeRequest(postId);
       if (addResult.code === HttpCode.OK) {
         setPost(prevState => {
           if (prevState) {

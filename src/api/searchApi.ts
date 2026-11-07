@@ -7,12 +7,11 @@ import {
   Video,
 } from '@/utils/types';
 
-async function searchAllRequest(keyword: string, userId?: string) {
+async function searchAllRequest(keyword: string) {
   const options: Options = {
     body: {
       keyword,
       type: 'all',
-      userId,
     },
   };
   return await request<SearchAllResult>('/search', Method.GET, options);
@@ -54,7 +53,6 @@ async function searchPostRequest(
   keyword: string,
   pageNum: number,
   pageSize: number,
-  userId?: string,
 ) {
   const options: Options = {
     body: {
@@ -62,7 +60,6 @@ async function searchPostRequest(
       type: 'post',
       pageNum,
       pageSize,
-      userId,
     },
   };
   return await request<PageResult<Post>>('/search', Method.GET, options);

@@ -27,7 +27,7 @@ describe('CommentBox', () => {
     await userEvent.type(textarea, 'nice video');
     await userEvent.click(screen.getByRole('button', { name: 'Send' }));
     await waitFor(() => {
-      expect(sendCommentRequest).toHaveBeenCalledWith('test_user_id', 'video_id', 'nice video');
+      expect(sendCommentRequest).toHaveBeenCalledWith('video_id', 'nice video');
     });
     expect(submitCallback).toHaveBeenCalled();
     expect(textarea).toHaveValue('');
@@ -49,7 +49,6 @@ describe('CommentBox', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Send' }));
     await waitFor(() => {
       expect(sendReplyRequest).toHaveBeenCalledWith(
-        'test_user_id',
         'target_id',
         'comment_id',
         'c',

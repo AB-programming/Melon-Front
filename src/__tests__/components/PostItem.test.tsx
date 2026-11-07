@@ -62,7 +62,7 @@ describe('PostItem', () => {
     const context = renderPost(basePost);
     await userEvent.click(screen.getByRole('button', { name: /2$/ }));
     await waitFor(() => {
-      expect(addPostLikeRequest).toHaveBeenCalledWith('test_user_id', 'post_id');
+      expect(addPostLikeRequest).toHaveBeenCalledWith('post_id');
     });
     expect(context.handleAddPostLike).toHaveBeenCalledWith('post_id');
   });
@@ -71,7 +71,7 @@ describe('PostItem', () => {
     const context = renderPost({ ...basePost, isLike: true });
     await userEvent.click(screen.getByRole('button', { name: /2$/ }));
     await waitFor(() => {
-      expect(deletePostLikeRequest).toHaveBeenCalledWith('test_user_id', 'post_id');
+      expect(deletePostLikeRequest).toHaveBeenCalledWith('post_id');
     });
     expect(context.handleRemovePostLike).toHaveBeenCalledWith('post_id');
   });

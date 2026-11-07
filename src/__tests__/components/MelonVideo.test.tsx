@@ -52,13 +52,13 @@ describe('MelonVideo', () => {
     expect(await screen.findByText('42位订阅者')).toBeInTheDocument();
     await userEvent.click(subscribeButton);
     await waitFor(() => {
-      expect(addSubscriptionRequest).toHaveBeenCalledWith('test_user_id', 'user_id');
+      expect(addSubscriptionRequest).toHaveBeenCalledWith('user_id');
     });
     expect(await screen.findByRole('button', { name: '已订阅' })).toBeInTheDocument();
     expect(await screen.findByText('43位订阅者')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: '已订阅' }));
     await waitFor(() => {
-      expect(cancelSubscriptionRequest).toHaveBeenCalledWith('test_user_id', 'user_id');
+      expect(cancelSubscriptionRequest).toHaveBeenCalledWith('user_id');
     });
     expect(await screen.findByRole('button', { name: '订阅' })).toBeInTheDocument();
     expect(await screen.findByText('42位订阅者')).toBeInTheDocument();
@@ -70,12 +70,12 @@ describe('MelonVideo', () => {
     const collectButton = await screen.findByRole('button', { name: '收藏' });
     await userEvent.click(collectButton);
     await waitFor(() => {
-      expect(addCollectRequest).toHaveBeenCalledWith('test_user_id', 'video_id');
+      expect(addCollectRequest).toHaveBeenCalledWith('video_id');
     });
     expect(await screen.findByRole('button', { name: '已收藏' })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: '已收藏' }));
     await waitFor(() => {
-      expect(cancelCollectRequest).toHaveBeenCalledWith('test_user_id', 'video_id');
+      expect(cancelCollectRequest).toHaveBeenCalledWith('video_id');
     });
     expect(await screen.findByRole('button', { name: '收藏' })).toBeInTheDocument();
   });

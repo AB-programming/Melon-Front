@@ -3,9 +3,8 @@ import { Post } from '@/utils/types';
 
 const token = localStorage.getItem('access_token') ?? '';
 
-async function addPostRequest(userId: string, content: string, files: File[]) {
+async function addPostRequest(content: string, files: File[]) {
   const formData = new FormData();
-  formData.append('userId', userId);
   formData.append('content', content);
   files.forEach((file) => {
     formData.append('images', file);
@@ -26,30 +25,25 @@ async function fetchPostListWithUserIdRequest(userId: string) {
   });
 }
 
-async function fetchFollowedPostsRequest(userId: string) {
+async function fetchFollowedPostsRequest() {
   return await request<Post[]>('/post/selectFollowedPosts', Method.GET, {
     token,
-    body: {
-      userId,
-    },
   });
 }
 
-async function addPostLikeRequest(userId: string, postId: string) {
+async function addPostLikeRequest(postId: string) {
   return await request<string>('/post/like', Method.POST, {
     token,
     body: {
-      userId,
       postId,
     },
   });
 }
 
-async function deletePostLikeRequest(userId: string, postId: string) {
+async function deletePostLikeRequest(postId: string) {
   return await request<void>('/post/like', Method.DELETE, {
     token,
     body: {
-      userId,
       postId,
     },
   });
@@ -67,7 +61,6 @@ async function getPostRequest(postId: string, userId: string) {
       token,
       body: {
         postId,
-        userId,
       }
     });
   }

@@ -59,7 +59,7 @@ describe('CommentItem', () => {
     const { commentLikeCallback } = renderComment(baseComment);
     await userEvent.click(screen.getByRole('button', { name: /3$/ }));
     await waitFor(() => {
-      expect(addCommentLikeRequest).toHaveBeenCalledWith('test_user_id', 'comment_id');
+      expect(addCommentLikeRequest).toHaveBeenCalledWith('comment_id');
     });
     expect(commentLikeCallback).toHaveBeenCalledWith(false, 'comment_id');
   });
@@ -68,7 +68,7 @@ describe('CommentItem', () => {
     const { commentLikeCallback } = renderComment({ ...baseComment, isLiked: true });
     await userEvent.click(screen.getByRole('button', { name: /3$/ }));
     await waitFor(() => {
-      expect(cancelCommentLikeRequest).toHaveBeenCalledWith('test_user_id', 'comment_id');
+      expect(cancelCommentLikeRequest).toHaveBeenCalledWith('comment_id');
     });
     expect(commentLikeCallback).toHaveBeenCalledWith(true, 'comment_id');
   });

@@ -19,7 +19,7 @@ export function Comment({ video }: Props) {
 
   useEffect(() => {
     const fetchCommentList = async function () {
-      const result = await fetchCommentListRequest(user.id, video.id);
+      const result = await fetchCommentListRequest(video.id);
       if (result.code === HttpCode.OK) {
         setCommentList(result.data);
       }

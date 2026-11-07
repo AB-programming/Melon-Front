@@ -33,14 +33,13 @@ export function CommentBox(props: CommentBoxProps) {
 
   async function send() {
     if (type === 'comment') {
-      const result = await sendCommentRequest(user.id, props.video.id, text);
+      const result = await sendCommentRequest(props.video.id, text);
       if (result.code === HttpCode.OK) {
         setText('');
         submitCallback(result.data);
       }
     } else {
       const result = await sendReplyRequest(
-        user.id,
         props.targetId,
         props.commentId,
         props.replyType,
